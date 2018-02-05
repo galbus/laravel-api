@@ -6,7 +6,9 @@ For this I will concentrate on using it as an API server.
 
 I make the assumption that you have a local environment for development seup already. If you don’t, I recommend MAMP or XAMMP. The Laravel docs list other options for you set up a local environment such as Homestead or Valet, your mileage may vary.
 
-* TLDR
+* Quickstart: Docker
+* Quickstart: TLDR
+
 * Installing Laravel
 * Setup and Configure Database
 * Installing and Configuring Passport
@@ -20,7 +22,43 @@ I make the assumption that you have a local environment for development seup alr
 * Deploy the Code to Heroku
 
 
-## TLDR
+## Quickstart: Docker
+
+[Docker](https://www.docker.com/), using [Laradock](http://laradock.io/).
+
+```bash
+git clone --recursive -j8 git@github.com:wonkenstein/laravel-api.git
+cd laravel-api/laradock
+docker-compose up -d nginx mariadb
+docker-compose exec --user=laradock workspace composer install
+docker-compose exec --user=laradock workspace cp .env.example .env
+docker-compose exec --user=laradock workspace php artisan key:generate
+docker-compose exec --user=laradock workspace php artisan migrate 
+docker-compose exec --user=laradock workspace php artisan db:seed --class=UsersTableSeeder
+docker-compose exec --user=laradock workspace php artisan passport:keys
+docker-compose exec --user=laradock workspace php artisan passport:client --password --name=laravel-api
+```
+
+Manually copy the generated **Client ID** and **Client Secret** values into the `.env` file, at: 
+
+```bash
+AUTH_CLIENT_ID=...
+AUTH_CLIENT_SECRET=...
+```
+
+_(**@todo** edit the `.env` file automatically, using e.g. sed)_
+
+Finally, run the **Unit Tests**:
+
+```bash
+docker-compose exec --user=laradock workspace php ./vendor/bin/phpunit
+# cURL error 7: Failed to connect to localhost port 80: Connection refused
+# It's possibly a Docker network traffic restriction issue that should be fixed.
+```
+
+_This install could be reduced to a few lines of code as most of the commands could be scripted, using something like [Docker Sync](https://github.com/EugenMayer/docker-sync/wiki/7.-Scripting-with-docker-sync) or a `.sh` script._
+
+## Quickstart: TLDR
 
 If don't want to read all of this and just want to get this running, follow the steps below. Otherwise go to [Installing Laravel](#installing-laravel)
 
